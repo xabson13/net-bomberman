@@ -3,6 +3,8 @@ package game;
 import game.server.ComObject;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import java.io.*;
 import java.util.*;
@@ -10,14 +12,15 @@ import java.util.*;
 public class Bomberman extends Entorno {
 
     boolean isKeyPressed[] = new boolean[4];
-    public Jugador man;
+    public Jugador[] man = new Jugador[2];
     Point fourDir[] = {new Point(0, -1), new Point(0, 1), new Point(-1, 0), new Point(1, 0)};
     public Timer timer[] = new Timer[4];
 
-    public Bomberman(){
+    public Bomberman() {
         super();
         conexion = new Conexion(this);
     }
+
     public static void main(String[] args) {
         new Bomberman();
     }
@@ -39,14 +42,14 @@ public class Bomberman extends Entorno {
         }
         if (actionEvent.getActionCommand().equals("New Game")) {
             //newGame();
-            
+
             conexion.start();
         }
     }
 
-    public void pedirUsuario(){
+    public void pedirUsuario() {
         ComObject cobj = new ComObject(100);
-        String name = "sergio1";
+        String name = "sergio2";
         cobj.setTag(name);
         conexion.enviarPeticion(cobj);
     }
@@ -113,13 +116,13 @@ public class Bomberman extends Entorno {
         map = new Cosa[width][height][5];
 
         try {
-            InputStream fstream = this.getClass().getResourceAsStream("./map/1-1.map");
+            /*InputStream fstream = this.getClass().getResourceAsStream("./map/1-1.map");
             DataInputStream in = new DataInputStream(fstream);
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+            BufferedReader br = new BufferedReader(new InputStreamReader(in));*/
             String strLine;
             int line = 0;
             int player = 0;
-            for(line = 0; line < height; line++){
+            for (line = 0; line < height; line++) {
                 strLine = mapa[line];
                 for (int i = 0; i < strLine.length(); i++) {
                     if (strLine.charAt(i) == 'X') {
@@ -129,17 +132,17 @@ public class Bomberman extends Entorno {
                     }
                     if (strLine.charAt(i) >= 'a' && strLine.charAt(i) <= 'z') {
                         player++;
-                        man = new Jugador(new Point(i, line), player, this);
-                        map[i][line][4] = man;
+                        man[player-1] = new Jugador(new Point(i, line), player, this);
+                        man[player-1].setId(strLine.charAt(i));
+                        map[i][line][4] = man[player-1];
                     } else if (strLine.charAt(i) == 'O') {
                         map[i][line][0] = new Obstaculo(new Point(i, line));
                     } else if (strLine.charAt(i) == 'F') {
                         map[i][line][1] = new Destruible(new Point(i, line), this);
                     }
                 }
-                //line++;
             }
-            in.close();
+            //in.close();
         } catch (Exception e) { //Catch exception if any
             System.err.println("Error: " + e.getMessage());
         }
@@ -147,25 +150,24 @@ public class Bomberman extends Entorno {
         repaint();
     }
 
-    public boolean checkMove(Point newDir) {
+    public boolean checkMove(Point newDir, Jugador player) {
         boolean permitido = false;
-        int newX = (int) (man.getPoint().getX() + newDir.getX()), newY = (int) (man.getPoint().getY() + newDir.getY());
-        
-        //System.out.println("SX: " + man.getSmallSizeX() + ", SY: " + man.getSmallSizeY());
+        int newX = (int) (player.getPoint().getX() + newDir.getX()), newY = (int) (player.getPoint().getY() + newDir.getY());
+
         if (newDir.equals(new Point(0, -1))) {
-            if (!(man.getSmallSizeY() == -1 && (map[newX][newY][0] instanceof Indestruible || map[newX][newY][1] instanceof Indestruible)) && man.getSmallSizeX() == 0) {
+            if (!(player.getSmallSizeY() == -1 && (map[newX][newY][0] instanceof Indestruible || map[newX][newY][1] instanceof Indestruible)) && player.getSmallSizeX() == 0) {
                 permitido = true;
             }
         } else if (newDir.equals(new Point(0, 1))) {
-            if (!(man.getSmallSizeY() == 1 && (map[newX][newY][0] instanceof Indestruible || map[newX][newY][1] instanceof Indestruible)) && man.getSmallSizeX() == 0) {
+            if (!(player.getSmallSizeY() == 1 && (map[newX][newY][0] instanceof Indestruible || map[newX][newY][1] instanceof Indestruible)) && player.getSmallSizeX() == 0) {
                 permitido = true;
             }
         } else if (newDir.equals(new Point(-1, 0))) {
-            if (!(man.getSmallSizeX() == -1 && (map[newX][newY][0] instanceof Indestruible || map[newX][newY][1] instanceof Indestruible)) && man.getSmallSizeY() == 0) {
+            if (!(player.getSmallSizeX() == -1 && (map[newX][newY][0] instanceof Indestruible || map[newX][newY][1] instanceof Indestruible)) && player.getSmallSizeY() == 0) {
                 permitido = true;
             }
         } else if (newDir.equals(new Point(1, 0))) {
-            if (!(man.getSmallSizeX() == 1 && (map[newX][newY][0] instanceof Indestruible || map[newX][newY][1] instanceof Indestruible)) && man.getSmallSizeY() == 0) {
+            if (!(player.getSmallSizeX() == 1 && (map[newX][newY][0] instanceof Indestruible || map[newX][newY][1] instanceof Indestruible)) && player.getSmallSizeY() == 0) {
                 permitido = true;
             }
         }
@@ -173,33 +175,54 @@ public class Bomberman extends Entorno {
         return permitido;
     }
 
-    public void move(Point newDir) {
+    private Jugador getPlayerById(char id){
+        for( Jugador j : man ){
+            if( j.getId() == id )
+                return j;
+        }
+        return null;
+    }
+
+    public void move(Point newDir, Jugador j) {
         boolean permitido = true;
-        man.move(newDir);
-        permitido = checkMove(newDir);
-        man.reverseDir(newDir);
-        
+        j.move(newDir);
+        permitido = checkMove(newDir, j);
+        j.reverseDir(newDir);
+
         if (permitido) {
-            if (man.move(newDir)) {
-                map[(int) man.getPoint().getX()][(int) man.getPoint().getY()][4] = null;
-                Point temp = new Point(newDir.x + man.getPoint().x, newDir.y + man.getPoint().y);
-                map[(int) temp.getX()][(int) temp.getY()][4] = man;
-                man.setPoint(temp);
+            if (j.move(newDir)) {
+                map[(int) j.getPoint().getX()][(int) j.getPoint().getY()][4] = null;
+                Point temp = new Point(newDir.x + j.getPoint().x, newDir.y + j.getPoint().y);
+                map[(int) temp.getX()][(int) temp.getY()][4] = j;
+                j.setPoint(temp);
             }
-        } 
-        man.switchPic();
+        }
+        j.switchPic();
         repaint();
     }
 
     public void keyPressed(KeyEvent e) {
 
-        if (e.getKeyCode() == 32 && map[(int) man.getPoint().getX()][(int) man.getPoint().getY()][1] == null) {
-            map[(int) man.getPoint().getX()][(int) man.getPoint().getY()][1] = new Bomba(new Point(man.getPoint()), 3, this);
-        }
         if (e.getKeyCode() >= 37 && e.getKeyCode() <= 40 && timer[e.getKeyCode() - 37] == null) {
-            Point movept = new Point(0, 0);
             isKeyPressed[e.getKeyCode() - 37] = true;
-            switch (e.getKeyCode()) {
+            ComObject cobj = new ComObject(103);
+            cobj.addObject(e.getKeyCode());
+            conexion.enviarPeticion(cobj);
+            
+
+        }
+
+    }
+
+    public void mover(int kcode, char movId) {
+        Jugador j = getPlayerById(movId);
+        if (kcode == 32 && map[(int) j.getPoint().getX()][(int) j.getPoint().getY()][1] == null) {
+            map[(int) j.getPoint().getX()][(int) j.getPoint().getY()][1] = new Bomba(new Point(j.getPoint()), 3, this);
+        }
+        if (kcode >= 37 && kcode <= 40 && timer[kcode - 37] == null) {
+            Point movept = new Point(0, 0);
+            isKeyPressed[kcode - 37] = false;
+            switch (kcode) {
                 case KeyEvent.VK_UP:
                     movept = new Point(0, -1);
                     break;
@@ -214,28 +237,37 @@ public class Bomberman extends Entorno {
                     break;
             }
 
-            for (int i = 0; i < isKeyPressed.length; i++) {
+            /*for (int i = 0; i < isKeyPressed.length; i++) {
                 if (timer[i] != null) {
                     timer[i].cancel();
                 }
-            }
-            timer[e.getKeyCode() - 37] = new Timer();
-            timer[e.getKeyCode() - 37].schedule(new LoadSteps(movept), 0, 80);
-            
-        }
+            }*/
 
+            timer[kcode - 37] = new Timer();
+            timer[kcode - 37].schedule(new LoadSteps(movept, j), 0, 80);
+            try {
+                //repaint();
+                Thread.sleep(1);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+            timer[kcode - 37].cancel();
+            timer[kcode - 37] = null;
+        }
     }
 
     class LoadSteps extends TimerTask {
 
         Point pt = new Point(0, 0);
+        Jugador j = null;
 
-        public LoadSteps(Point pt) {
+        public LoadSteps(Point pt, Jugador j) {
+            this.j = j;
             this.pt = pt;
         }
 
         public void run() {
-            move(pt);
+            move(pt, j);
         }
     }
 
@@ -304,7 +336,7 @@ public class Bomberman extends Entorno {
     }
 
     public void keyReleased(KeyEvent e) {
-        if (e.getKeyCode() >= 37 && e.getKeyCode() <= 40 && isKeyPressed[e.getKeyCode() - 37]) {
+      /*  if (e.getKeyCode() >= 37 && e.getKeyCode() <= 40 && isKeyPressed[e.getKeyCode() - 37]) {
             timer[e.getKeyCode() - 37].cancel();
             timer[e.getKeyCode() - 37] = null;
             isKeyPressed[e.getKeyCode() - 37] = false;
@@ -323,7 +355,7 @@ public class Bomberman extends Entorno {
                 man.finishMove(new Point(1, 0));
                 break;
         }
-        repaint();
+        repaint();*/
     }
 
     public void keyTyped(KeyEvent e) {
