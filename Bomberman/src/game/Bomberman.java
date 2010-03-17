@@ -49,7 +49,7 @@ public class Bomberman extends Entorno {
 
     public void pedirUsuario() {
         ComObject cobj = new ComObject(100);
-        String name = "sergio2";
+        String name = "sergio1";
         cobj.setTag(name);
         conexion.enviarPeticion(cobj);
     }
