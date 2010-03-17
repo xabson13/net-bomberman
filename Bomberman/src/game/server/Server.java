@@ -32,7 +32,7 @@ public class Server {
             System.out.println("INFO: Servidor iniciado por el puerto " + PORT);
             while (true) {
                 Socket socketClient = socketServer.accept();
-                System.out.println("Nueva conexion " + socketClient.getInetAddress());
+                //System.out.println("Nueva conexion " + socketClient.getInetAddress());
                 Conexion conn = new Conexion(socketClient);
                 clientes.add(conn);
                 conn.start();
