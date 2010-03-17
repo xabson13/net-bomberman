@@ -28,9 +28,10 @@ public class MapFactory {
     private final static int MAPWIDTH = 15;
     private final static int MAPHEIGHT = 11;
     private Cosa map[][][];
-    private String mapa;
+    private String mapa[];
 
     public MapFactory() {
+        mapa = new String[MAPHEIGHT];
     }
 
     public boolean checkMove(Point newDir, Jugador man) {
@@ -61,15 +62,15 @@ public class MapFactory {
         public void generate(List<Conexion> threadPlayers) {
         map = new Cosa[MAPWIDTH][MAPHEIGHT][5];
         try {
-            InputStream fstream = this.getClass().getResourceAsStream("./map/1-1.map");
+            InputStream fstream = this.getClass().getResourceAsStream("../map/1-1.map");
             DataInputStream in = new DataInputStream(fstream);
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
             String strLine;
             int line = 0;
             int player = 0;
             while ((strLine = br.readLine()) != null) {
-                //System.out.println(strLine);
-                mapa += strLine + ",";
+                System.out.println(strLine);
+                mapa[line] = strLine;
                 for (int i = 0; i < strLine.length(); i++) {
                     if (strLine.charAt(i) == 'X') {
                         map[i][line][0] = new Muro(new Point(i, line));
@@ -91,11 +92,12 @@ public class MapFactory {
             }
             in.close();
         } catch (Exception e) {
+            e.printStackTrace();
             System.err.println("Error: " + e.getMessage());
         }
     }
 
-    public String getMapa() {
+    public String[] getMapa() {
         return mapa;
     }
 }

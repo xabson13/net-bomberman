@@ -1,5 +1,6 @@
 package game;
 
+import game.server.ComObject;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.JOptionPane;
@@ -13,6 +14,10 @@ public class Bomberman extends Entorno {
     Point fourDir[] = {new Point(0, -1), new Point(0, 1), new Point(-1, 0), new Point(1, 0)};
     public Timer timer[] = new Timer[4];
 
+    public Bomberman(){
+        super();
+        conexion = new Conexion(this);
+    }
     public static void main(String[] args) {
         new Bomberman();
     }
@@ -22,17 +27,28 @@ public class Bomberman extends Entorno {
             JOptionPane.showMessageDialog(null, "CSC3100: Software Engineering\nProject: Bomberman\n(c) Wong Man Tik");
         }
         if (actionEvent.getActionCommand().equals("Reset Game")) {
+            conexion.setListo();
         }
         if (actionEvent.getActionCommand().equals("Quit Game")) {
             System.exit(1);
         }
         if (actionEvent.getActionCommand().equals("Save Moves")) {
+            conexion.empezarJuego();
         }
         if (actionEvent.getActionCommand().equals("Load  Moves")) {
         }
         if (actionEvent.getActionCommand().equals("New Game")) {
-            newGame();
+            //newGame();
+            
+            conexion.start();
         }
+    }
+
+    public void pedirUsuario(){
+        ComObject cobj = new ComObject(100);
+        String name = "sergio1";
+        cobj.setTag(name);
+        conexion.enviarPeticion(cobj);
     }
 
     public String getLoadFilePath() {
@@ -92,7 +108,7 @@ public class Bomberman extends Entorno {
         }
     }
 
-    private void newGame() {
+    protected void newGame(String mapa[]) {
 
         map = new Cosa[width][height][5];
 
@@ -103,8 +119,8 @@ public class Bomberman extends Entorno {
             String strLine;
             int line = 0;
             int player = 0;
-            while ((strLine = br.readLine()) != null) {
-
+            for(line = 0; line < height; line++){
+                strLine = mapa[line];
                 for (int i = 0; i < strLine.length(); i++) {
                     if (strLine.charAt(i) == 'X') {
                         map[i][line][0] = new Muro(new Point(i, line));
@@ -121,7 +137,7 @@ public class Bomberman extends Entorno {
                         map[i][line][1] = new Destruible(new Point(i, line), this);
                     }
                 }
-                line++;
+                //line++;
             }
             in.close();
         } catch (Exception e) { //Catch exception if any

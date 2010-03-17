@@ -5,13 +5,14 @@
 
 package game.server;
 
+import java.io.Serializable;
 import java.util.Vector;
 
 /**
  *
  * @author Sergio
  */
-public class ComObject {
+public class ComObject implements Serializable{
     private int code;
     private Vector objects;
     private String tag;

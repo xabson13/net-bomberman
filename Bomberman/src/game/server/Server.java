@@ -32,6 +32,7 @@ public class Server {
             System.out.println("INFO: Servidor iniciado por el puerto " + PORT);
             while (true) {
                 Socket socketClient = socketServer.accept();
+                System.out.println("Nueva conexion " + socketClient.getInetAddress());
                 Conexion conn = new Conexion(socketClient);
                 clientes.add(conn);
                 conn.start();
@@ -52,9 +53,10 @@ public class Server {
         Vector<String> users = new Vector<String>();
 
         for (Conexion con : clientes) {
-            if (!con.getNombre().equals(c.getNombre())) {
-                users.add(con.getNombre());
-            }
+            if( con.getNombre() != null )
+                if (!con.getNombre().equals(c.getNombre())) {
+                    users.add(con.getNombre());
+                }
         }
         return users;
     }
@@ -100,6 +102,7 @@ public class Server {
                 while (true) {
                     ComObject cobj = (ComObject) entrada.readObject();
                     if (cobj != null) {
+                        System.out.println("Request code: " + cobj.getCode());
                         processAction(cobj);
                     }
                 }
@@ -176,10 +179,12 @@ public class Server {
             }
             if (isAllReady()) {
                 mf.generate(clientes);
-                ComObject cobj = new ComObject(202); // mapa
-                cobj.addObject(mf.getMapa());
-                cobj.addObject(player.getId());
-                enviarRespuesta(cobj);
+                for( Conexion c : clientes ){
+                    ComObject cobj = new ComObject(202); // mapa
+                    cobj.addObject(mf.getMapa());
+                    cobj.addObject(c.player.getId());
+                    c.enviarRespuesta(cobj);
+                }
             } else {
                 enviarRespuesta(new ComObject(405)); // not all ready
             }
@@ -193,9 +198,10 @@ public class Server {
 
         private boolean existeUsuario(String name) {
             for (Conexion c : clientes) {
-                if (c.getNombre().equalsIgnoreCase(name) && this != c) {
-                    return true;
-                }
+                if( c.getNombre() != null )
+                    if (c.getNombre().equalsIgnoreCase(name) && this != c) {
+                        return true;
+                    }
             }
             return false;
         }

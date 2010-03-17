@@ -16,6 +16,7 @@ abstract class Entorno extends JPanel implements ActionListener, KeyListener {
     protected int picheight = 32;
     protected int width = 15;
     protected int height = 11;
+    protected Conexion conexion;
 
     public Entorno() {
         menuBar = new JMenuBar();
@@ -42,8 +43,8 @@ abstract class Entorno extends JPanel implements ActionListener, KeyListener {
         quitButton.addActionListener(this);
         aboutButton.addActionListener(this);
 
-        resetButton.setEnabled(false);
-        saveButton.setEnabled(false);
+        /*resetButton.setEnabled(false);
+        saveButton.setEnabled(false);*/
         loadButton.setEnabled(false);
 
 

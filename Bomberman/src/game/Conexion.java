@@ -27,32 +27,48 @@ public class Conexion extends Thread {
     private Socket socket;
     private boolean connected;
 
-    Conexion(Socket socket, Bomberman bomberman) {
+    Conexion(Bomberman bomberman) {
         this.usuarios = new Vector();
         this.connected = false;
         this.bomberman = bomberman;
         try {
-            this.socket = new Socket(HOST, PORT);
+            socket = new Socket(HOST, PORT);
+            salida = new ObjectOutputStream(socket.getOutputStream());
+            entrada = new ObjectInputStream(socket.getInputStream());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-
+        System.out.println("start(0)");
     }
 
     @Override
     public void run() {
+        System.out.println("start()");
         try {
-            entrada = new ObjectInputStream(socket.getInputStream());
-            salida = new ObjectOutputStream(socket.getOutputStream());
+            bomberman.pedirUsuario();
+            System.out.println("start(2)");
             while (true) {
                 ComObject cobj = (ComObject) entrada.readObject();
                 if (cobj != null) {
+                    System.out.println("Response code: " + cobj.getCode());
                     processAction(cobj);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    
+
+    public void setListo(){
+        ComObject cobj = new ComObject(101);
+        enviarPeticion(cobj);
+    }
+
+    public void empezarJuego(){
+        ComObject cobj = new ComObject(102);
+        enviarPeticion(cobj);
     }
 
     private void llenarListaUsuarios(Vector data) {
@@ -98,6 +114,14 @@ public class Conexion extends Thread {
                 break;
             case 302: // broadcast remove user
                 removerUsuario(cobj.getTag());
+                break;
+            case 402: // userexist
+                bomberman.pedirUsuario();
+                break;
+            case 202: // connected
+                connected = true;
+                String mapa[] = (String[]) cobj.getObjects().get(0);
+                bomberman.newGame(mapa);
                 break;
         }
     }
