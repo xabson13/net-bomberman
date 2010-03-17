@@ -26,6 +26,7 @@ public class Conexion extends Thread {
     private ObjectOutputStream salida;
     private Socket socket;
     private boolean connected;
+    private char id;
 
     Conexion(Bomberman bomberman) {
         this.usuarios = new Vector();
@@ -118,10 +119,15 @@ public class Conexion extends Thread {
             case 402: // userexist
                 bomberman.pedirUsuario();
                 break;
-            case 202: // connected
+            case 303: // broadcast mapa
                 connected = true;
                 String mapa[] = (String[]) cobj.getObjects().get(0);
+                id = (Character) cobj.getObjects().get(1);
                 bomberman.newGame(mapa);
+                break;
+            case 304: // broadcast move
+                char movId = (Character) cobj.getObjects().get(1);
+                bomberman.mover((Integer)cobj.getObjects().get(0), movId);
                 break;
         }
     }
