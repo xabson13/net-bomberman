@@ -185,6 +185,7 @@ public class Server {
                     cobj.addObject(c.player.getId());
                     c.enviarRespuesta(cobj);
                 }
+                started = true;
             } else {
                 enviarRespuesta(new ComObject(405)); // not all ready
             }
@@ -192,8 +193,9 @@ public class Server {
 
         private void move(Vector data) {
             Point mov = (Point) data.get(0);
-           /* if(mf.checkMove(mov, player))
-                broadcastMensaje(nombre + ": " + text);*/
+            if(started && connected){
+                
+            }
         }
 
         private boolean existeUsuario(String name) {
