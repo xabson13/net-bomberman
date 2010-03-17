@@ -122,6 +122,7 @@ public class Server {
         private void enviarRespuesta(ComObject cobj) {
             try {
                 salida.writeObject(cobj);
+                salida.flush();
             } catch (Exception err) {
                 err.printStackTrace();
             }
@@ -180,7 +181,7 @@ public class Server {
             if (isAllReady()) {
                 mf.generate(clientes);
                 for( Conexion c : clientes ){
-                    ComObject cobj = new ComObject(202); // mapa
+                    ComObject cobj = new ComObject(303); // broascast mapa
                     cobj.addObject(mf.getMapa());
                     cobj.addObject(c.player.getId());
                     c.enviarRespuesta(cobj);
@@ -192,9 +193,12 @@ public class Server {
         }
 
         private void move(Vector data) {
-            Point mov = (Point) data.get(0);
+            Integer kcode = (Integer) data.get(0);
             if(started && connected){
-                
+                ComObject cobj = new ComObject(304); // broadcast move
+                cobj.addObject(kcode);
+                cobj.addObject(player.getId());
+                broadcastRespuesta(cobj);
             }
         }
 
