@@ -44,6 +44,10 @@ public class Jugador extends Cosa {
         return id;
     }
 
+    public void setId(char id) {
+        this.id = id;
+    }
+
     class LoadSteps extends TimerTask {
 
         int picNo = 0;
