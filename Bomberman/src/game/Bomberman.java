@@ -49,7 +49,7 @@ public class Bomberman extends Entorno {
 
     public void pedirUsuario() {
         ComObject cobj = new ComObject(100);
-        String name = "sergio1";
+        String name = "sergio2";
         cobj.setTag(name);
         conexion.enviarPeticion(cobj);
     }
@@ -221,7 +221,7 @@ public class Bomberman extends Entorno {
         }
         if (kcode >= 37 && kcode <= 40 && timer[kcode - 37] == null) {
             Point movept = new Point(0, 0);
-            isKeyPressed[kcode - 37] = false;
+            isKeyPressed[kcode - 37] = true;
             switch (kcode) {
                 case KeyEvent.VK_UP:
                     movept = new Point(0, -1);
@@ -243,16 +243,17 @@ public class Bomberman extends Entorno {
                 }
             }*/
 
-            timer[kcode - 37] = new Timer();
-            timer[kcode - 37].schedule(new LoadSteps(movept, j), 0, 80);
-            try {
-                //repaint();
+            //timer[kcode - 37] = new Timer();
+            (new LoadSteps(movept, j)).run();
+            /*try {
+                repaint();
                 Thread.sleep(1);
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
             timer[kcode - 37].cancel();
-            timer[kcode - 37] = null;
+            timer[kcode - 37] = null;*/
+            
         }
     }
 
