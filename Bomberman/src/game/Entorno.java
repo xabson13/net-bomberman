@@ -48,8 +48,8 @@ abstract class Entorno extends JPanel implements ActionListener, KeyListener {
         loadButton.setEnabled(false);
 
 
-        frame = new JFrame("Sokoban By Anson Wong");
-        status = new JLabel("Game Level: -/92 Number of Moves: 0");
+        frame = new JFrame("Net Bomberman");
+        status = new JLabel("ESCOM");
         frame.setJMenuBar(menuBar);
         //Set layout
         frame.setLayout(new FlowLayout());

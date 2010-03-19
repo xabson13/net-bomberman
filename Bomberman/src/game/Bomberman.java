@@ -155,19 +155,35 @@ public class Bomberman extends Entorno {
         int newX = (int) (player.getPoint().getX() + newDir.getX()), newY = (int) (player.getPoint().getY() + newDir.getY());
 
         if (newDir.equals(new Point(0, -1))) {
-            if (!(player.getSmallSizeY() == -1 && (map[newX][newY][0] instanceof Indestruible || map[newX][newY][1] instanceof Indestruible)) && player.getSmallSizeX() == 0) {
+            if (!(player.getSmallSizeY() == -1 && 
+                    (map[newX][newY][0] instanceof Indestruible ||
+                     map[newX][newY][1] instanceof Indestruible ||
+                     map[newX][newY][4] instanceof Indestruible)) &&
+                    player.getSmallSizeX() == 0) {
                 permitido = true;
             }
         } else if (newDir.equals(new Point(0, 1))) {
-            if (!(player.getSmallSizeY() == 1 && (map[newX][newY][0] instanceof Indestruible || map[newX][newY][1] instanceof Indestruible)) && player.getSmallSizeX() == 0) {
+            if (!(player.getSmallSizeY() == 1 && 
+                    (map[newX][newY][0] instanceof Indestruible ||
+                     map[newX][newY][4] instanceof Indestruible ||
+                     map[newX][newY][1] instanceof Indestruible)) &&
+                     player.getSmallSizeX() == 0) {
                 permitido = true;
             }
         } else if (newDir.equals(new Point(-1, 0))) {
-            if (!(player.getSmallSizeX() == -1 && (map[newX][newY][0] instanceof Indestruible || map[newX][newY][1] instanceof Indestruible)) && player.getSmallSizeY() == 0) {
+            if (!(player.getSmallSizeX() == -1 && 
+                    (map[newX][newY][0] instanceof Indestruible ||
+                     map[newX][newY][4] instanceof Indestruible ||
+                     map[newX][newY][1] instanceof Indestruible)) &&
+                     player.getSmallSizeY() == 0) {
                 permitido = true;
             }
         } else if (newDir.equals(new Point(1, 0))) {
-            if (!(player.getSmallSizeX() == 1 && (map[newX][newY][0] instanceof Indestruible || map[newX][newY][1] instanceof Indestruible)) && player.getSmallSizeY() == 0) {
+            if (!(player.getSmallSizeX() == 1 && 
+                    (map[newX][newY][0] instanceof Indestruible ||
+                     map[newX][newY][4] instanceof Indestruible ||
+                     map[newX][newY][1] instanceof Indestruible)) &&
+                     player.getSmallSizeY() == 0) {
                 permitido = true;
             }
         }

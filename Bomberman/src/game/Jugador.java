@@ -3,7 +3,7 @@ package game;
 import java.awt.*;
 import java.util.*;
 
-public class Jugador extends Cosa {
+public class Jugador extends Indestruible {
 
     int picSwitch = 0;
     Point curDir = new Point(0, 1);
