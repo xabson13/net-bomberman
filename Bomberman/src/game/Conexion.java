@@ -106,6 +106,7 @@ public class Conexion extends Thread {
     }
 
     private void processAction(ComObject cobj) {
+        char movId;
         switch (cobj.getCode()) {
             case 201: // connected
                 llenarListaUsuarios(cobj.getObjects());
@@ -126,8 +127,12 @@ public class Conexion extends Thread {
                 bomberman.newGame(mapa);
                 break;
             case 304: // broadcast move
-                char movId = (Character) cobj.getObjects().get(1);
+                movId = (Character) cobj.getObjects().get(1);
                 bomberman.mover((Integer)cobj.getObjects().get(0), movId);
+                break;
+            case 305: // broadcast bomba
+                movId = (Character) cobj.getObjects().get(1);
+                bomberman.bomba((Integer)cobj.getObjects().get(0), movId);
                 break;
         }
     }

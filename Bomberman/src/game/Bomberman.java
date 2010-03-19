@@ -49,7 +49,7 @@ public class Bomberman extends Entorno {
 
     public void pedirUsuario() {
         ComObject cobj = new ComObject(100);
-        String name = "sergio2";
+        String name = JOptionPane.showInputDialog("Nombre: ");
         cobj.setTag(name);
         conexion.enviarPeticion(cobj);
     }
@@ -208,17 +208,25 @@ public class Bomberman extends Entorno {
             ComObject cobj = new ComObject(103);
             cobj.addObject(e.getKeyCode());
             conexion.enviarPeticion(cobj);
-            
+        }
 
+        if( e.getKeyCode() == 32 ){
+            ComObject cobj = new ComObject(104);
+            cobj.addObject(e.getKeyCode());
+            conexion.enviarPeticion(cobj);
         }
 
     }
 
-    public void mover(int kcode, char movId) {
+    public void bomba(int kcode, char movId){
         Jugador j = getPlayerById(movId);
         if (kcode == 32 && map[(int) j.getPoint().getX()][(int) j.getPoint().getY()][1] == null) {
             map[(int) j.getPoint().getX()][(int) j.getPoint().getY()][1] = new Bomba(new Point(j.getPoint()), 3, this);
         }
+    }
+
+    public void mover(int kcode, char movId) {
+        Jugador j = getPlayerById(movId);
         if (kcode >= 37 && kcode <= 40 && timer[kcode - 37] == null) {
             Point movept = new Point(0, 0);
             isKeyPressed[kcode - 37] = true;
@@ -236,24 +244,7 @@ public class Bomberman extends Entorno {
                     movept = new Point(1, 0);
                     break;
             }
-
-            /*for (int i = 0; i < isKeyPressed.length; i++) {
-                if (timer[i] != null) {
-                    timer[i].cancel();
-                }
-            }*/
-
-            //timer[kcode - 37] = new Timer();
-            (new LoadSteps(movept, j)).run();
-            /*try {
-                repaint();
-                Thread.sleep(1);
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
-            }
-            timer[kcode - 37].cancel();
-            timer[kcode - 37] = null;*/
-            
+            (new LoadSteps(movept, j)).run(); 
         }
     }
 

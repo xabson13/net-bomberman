@@ -142,6 +142,9 @@ public class Server {
                 case 103: // move
                     move(cobj.getObjects());
                     break;
+                case 104: // bomba
+                    bomba(cobj.getObjects());
+                    break;
             }
         }
 
@@ -196,6 +199,16 @@ public class Server {
             Integer kcode = (Integer) data.get(0);
             if(started && connected){
                 ComObject cobj = new ComObject(304); // broadcast move
+                cobj.addObject(kcode);
+                cobj.addObject(player.getId());
+                broadcastRespuesta(cobj);
+            }
+        }
+
+        private void bomba(Vector data) {
+            Integer kcode = (Integer) data.get(0);
+            if(started && connected){
+                ComObject cobj = new ComObject(305); // broadcast bomba
                 cobj.addObject(kcode);
                 cobj.addObject(player.getId());
                 broadcastRespuesta(cobj);
