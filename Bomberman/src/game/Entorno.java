@@ -35,7 +35,7 @@ abstract class Entorno extends JPanel implements ActionListener, KeyListener {
         gameButton.add(quitButton);
         helpButton.add(aboutButton);
         menuBar.add(gameButton);
-        menuBar.add(helpButton);
+        //menuBar.add(helpButton);
         newGameButton.addActionListener(this);
         resetButton.addActionListener(this);
         saveButton.addActionListener(this);
