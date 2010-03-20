@@ -26,27 +26,6 @@ public abstract class Cosa {
         return true;
     }
 
-    public boolean move(Point pt) {
-
-        smallSizeY += pt.y;
-        smallSizeX += pt.x;
-
-        if (smallSizeX == (int) MAXSMALLSIZE / 2 + 1) {
-            smallSizeX = (int) MAXSMALLSIZE / 2 * (-1);
-            return true;
-        } else if (smallSizeX == (int) MAXSMALLSIZE / 2 * (-1) - 1) {
-            smallSizeX = (int) MAXSMALLSIZE / 2;
-            return true;
-        } else if (smallSizeY == (int) MAXSMALLSIZE / 2 + 1) {
-            smallSizeY = (int) MAXSMALLSIZE / 2 * (-1);
-            return true;
-        } else if (smallSizeY == (int) MAXSMALLSIZE / 2 * (-1) - 1) {
-            smallSizeY = (int) MAXSMALLSIZE / 2;
-            return true;
-        }
-        return false;
-    }
-
     public void reverseDir(Point pt) {
         smallSizeY -= pt.y;
         smallSizeX -= pt.x;

@@ -19,7 +19,7 @@ import javax.swing.JOptionPane;
 public class Conexion extends Thread {
 
     private Vector usuarios;
-    private final static int PORT = 8000;
+    private final static int PORT = 8012;
     private final static String HOST = "localhost";
     private Bomberman bomberman;
     private ObjectInputStream entrada;
@@ -132,7 +132,7 @@ public class Conexion extends Thread {
                 break;
             case 305: // broadcast bomba
                 movId = (Character) cobj.getObjects().get(1);
-                bomberman.bomba((Integer)cobj.getObjects().get(0), movId);
+                bomberman.ponerBomba(movId);
                 break;
         }
     }

@@ -9,10 +9,10 @@ import javax.swing.JOptionPane;
 import java.io.*;
 import java.util.*;
 
-public class Bomberman extends Entorno {
+public class Bomberman extends Entorno implements Actualizable{
 
     boolean isKeyPressed[] = new boolean[4];
-    public Jugador[] man = new Jugador[2];
+    public Jugador[] players = new Jugador[2];
     Point fourDir[] = {new Point(0, -1), new Point(0, 1), new Point(-1, 0), new Point(1, 0)};
     public Timer timer[] = new Timer[4];
 
@@ -132,9 +132,9 @@ public class Bomberman extends Entorno {
                     }
                     if (strLine.charAt(i) >= 'a' && strLine.charAt(i) <= 'z') {
                         player++;
-                        man[player-1] = new Jugador(new Point(i, line), player, this);
-                        man[player-1].setId(strLine.charAt(i));
-                        map[i][line][4] = man[player-1];
+                        players[player-1] = new Jugador(new Point(i, line), player, this);
+                        players[player-1].setId(strLine.charAt(i));
+                        map[i][line][4] = players[player-1];
                     } else if (strLine.charAt(i) == 'O') {
                         map[i][line][0] = new Obstaculo(new Point(i, line));
                     } else if (strLine.charAt(i) == 'F') {
@@ -150,69 +150,20 @@ public class Bomberman extends Entorno {
         repaint();
     }
 
-    public boolean checkMove(Point newDir, Jugador player) {
-        boolean permitido = false;
-        int newX = (int) (player.getPoint().getX() + newDir.getX()), newY = (int) (player.getPoint().getY() + newDir.getY());
-
-        if (newDir.equals(new Point(0, -1))) {
-            if (!(player.getSmallSizeY() == -1 && 
-                    (map[newX][newY][0] instanceof Indestruible ||
-                     map[newX][newY][1] instanceof Indestruible ||
-                     map[newX][newY][4] instanceof Indestruible)) &&
-                    player.getSmallSizeX() == 0) {
-                permitido = true;
-            }
-        } else if (newDir.equals(new Point(0, 1))) {
-            if (!(player.getSmallSizeY() == 1 && 
-                    (map[newX][newY][0] instanceof Indestruible ||
-                     map[newX][newY][4] instanceof Indestruible ||
-                     map[newX][newY][1] instanceof Indestruible)) &&
-                     player.getSmallSizeX() == 0) {
-                permitido = true;
-            }
-        } else if (newDir.equals(new Point(-1, 0))) {
-            if (!(player.getSmallSizeX() == -1 && 
-                    (map[newX][newY][0] instanceof Indestruible ||
-                     map[newX][newY][4] instanceof Indestruible ||
-                     map[newX][newY][1] instanceof Indestruible)) &&
-                     player.getSmallSizeY() == 0) {
-                permitido = true;
-            }
-        } else if (newDir.equals(new Point(1, 0))) {
-            if (!(player.getSmallSizeX() == 1 && 
-                    (map[newX][newY][0] instanceof Indestruible ||
-                     map[newX][newY][4] instanceof Indestruible ||
-                     map[newX][newY][1] instanceof Indestruible)) &&
-                     player.getSmallSizeY() == 0) {
-                permitido = true;
-            }
-        }
-
-        return permitido;
-    }
-
     private Jugador getPlayerById(char id){
-        for( Jugador j : man ){
+        for( Jugador j : players ){
             if( j.getId() == id )
                 return j;
         }
         return null;
     }
 
-    public void move(Point newDir, Jugador j) {
-        boolean permitido = true;
-        j.move(newDir);
-        permitido = checkMove(newDir, j);
-        j.reverseDir(newDir);
+    public void ponerBomba(char movId){
+            getPlayerById(movId).ponerBomba(map);
+    }
 
-        if (permitido) {
-            if (j.move(newDir)) {
-                map[(int) j.getPoint().getX()][(int) j.getPoint().getY()][4] = null;
-                Point temp = new Point(newDir.x + j.getPoint().x, newDir.y + j.getPoint().y);
-                map[(int) temp.getX()][(int) temp.getY()][4] = j;
-                j.setPoint(temp);
-            }
-        }
+    public void move(Point newDir, Jugador j) {
+        j.move(newDir, map);
         j.switchPic();
         repaint();
     }
@@ -232,13 +183,6 @@ public class Bomberman extends Entorno {
             conexion.enviarPeticion(cobj);
         }
 
-    }
-
-    public void bomba(int kcode, char movId){
-        Jugador j = getPlayerById(movId);
-        if (kcode == 32 && map[(int) j.getPoint().getX()][(int) j.getPoint().getY()][1] == null) {
-            map[(int) j.getPoint().getX()][(int) j.getPoint().getY()][1] = new Bomba(new Point(j.getPoint()), 3, this);
-        }
     }
 
     public void mover(int kcode, char movId) {
@@ -262,6 +206,10 @@ public class Bomberman extends Entorno {
             }
             (new LoadSteps(movept, j)).run(); 
         }
+    }
+
+    public void refresh() {
+        repaint();
     }
 
     class LoadSteps extends TimerTask {
@@ -288,82 +236,7 @@ public class Bomberman extends Entorno {
         return false;
     }
 
-    public void removeObject(Point p, int layer) {
-        map[(int) p.getX()][(int) p.getY()][layer] = null;
-        repaint();
-    }
-
-    public void explode(Point p) {
-        int flameLen = ((Bomba) (map[(int) p.getX()][(int) p.getY()][1])).getFlameLen();
-        map[(int) p.getX()][(int) p.getY()][1] = null;
-        map[(int) p.getX()][(int) p.getY()][0] = new Fondo(new Point(p));
-        map[(int) p.getX()][(int) p.getY()][1] = new Flama(new Point(p), 0, this);
-        for (int k = 0; k < fourDir.length; k++) {
-            for (int i = 1; i <= flameLen; i++) {
-                boolean re = true;
-                int flameType = 0;
-                for (int j = 0; j < 5; j++) {
-                    if (map[(int) (p.getX() + fourDir[k].getX() * i)][(int) (p.getY() + fourDir[k].getY() * i)][j] != null) {
-                        re = re && map[(int) (p.getX() + fourDir[k].getX() * i)][(int) (p.getY() + fourDir[k].getY() * i)][j].explode();
-                    }
-                }
-                if (!re) {
-                    break;
-                }
-
-                if (fourDir[k].getY() == -1) {//UP
-                    flameType = 5;
-                    if (i == flameLen && !(map[(int) (p.getX() + fourDir[k].getX() * (1 + i))][(int) (p.getY() + fourDir[k].getY() * (1 + i))][1] instanceof Flama)) {
-                        flameType = 6;
-                    }
-                }
-                if (fourDir[k].getY() == 1) {//DOWN
-                    flameType = 5;
-                    if (i == flameLen && !(map[(int) (p.getX() + fourDir[k].getX() * (1 + i))][(int) (p.getY() + fourDir[k].getY() * (1 + i))][1] instanceof Flama)) {
-                        flameType = 7;
-                    }
-                }
-                if (fourDir[k].getX() == -1) {//LEFT
-                    flameType = 2;
-                    if (i == flameLen && !(map[(int) (p.getX() + fourDir[k].getX() * (1 + i))][(int) (p.getY() + fourDir[k].getY() * (1 + i))][1] instanceof Flama)) {
-                        flameType = 3;
-                    }
-                }
-                if (fourDir[k].getX() == 1) {//RIGT
-                    flameType = 2;
-                    if (i == flameLen && !(map[(int) (p.getX() + fourDir[k].getX() * (1 + i))][(int) (p.getY() + fourDir[k].getY() * (1 + i))][1] instanceof Flama)) {
-                        flameType = 4;
-                    }
-                }
-                if (map[(int) (p.getX() + fourDir[k].getX() * i)][(int) (p.getY() + fourDir[k].getY() * i)][1] == null || (map[(int) (p.getX() + fourDir[k].getX() * i)][(int) (p.getY() + fourDir[k].getY() * i)][1] instanceof Flama && ((Flama) map[(int) (p.getX() + fourDir[k].getX() * i)][(int) (p.getY() + fourDir[k].getY() * i)][1]).getType() != 0)) {
-                    map[(int) (p.getX() + fourDir[k].getX() * i)][(int) (p.getY() + fourDir[k].getY() * i)][1] = new Flama(new Point((int) (p.getX() + fourDir[k].getX() * i), (int) (p.getY() + fourDir[k].getY() * i)), flameType, this);
-                }
-            }
-        }
-        repaint();
-    }
-
     public void keyReleased(KeyEvent e) {
-      /*  if (e.getKeyCode() >= 37 && e.getKeyCode() <= 40 && isKeyPressed[e.getKeyCode() - 37]) {
-            timer[e.getKeyCode() - 37].cancel();
-            timer[e.getKeyCode() - 37] = null;
-            isKeyPressed[e.getKeyCode() - 37] = false;
-        }
-        switch (e.getKeyCode()) {
-            case KeyEvent.VK_UP:
-                man.finishMove(new Point(0, -1));
-                break;
-            case KeyEvent.VK_DOWN:
-                man.finishMove(new Point(0, 1));
-                break;
-            case KeyEvent.VK_LEFT:
-                man.finishMove(new Point(-1, 0));
-                break;
-            case KeyEvent.VK_RIGHT:
-                man.finishMove(new Point(1, 0));
-                break;
-        }
-        repaint();*/
     }
 
     public void keyTyped(KeyEvent e) {

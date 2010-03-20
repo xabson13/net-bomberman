@@ -16,7 +16,7 @@ import java.util.*;
  */
 public class Server {
 
-    public static final int PORT = 8000;
+    public static final int PORT = 8012;
     private List<Conexion> clientes;
     private boolean started;
 

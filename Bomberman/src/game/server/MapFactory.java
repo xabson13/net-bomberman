@@ -37,7 +37,7 @@ public class MapFactory {
     public boolean checkMove(Point newDir, Jugador man) {
         boolean needRe = false;
         int newX = (int) (man.getPoint().getX() + newDir.getX()), newY = (int) (man.getPoint().getY() + newDir.getY());
-        man.move(newDir);
+        man.startMove(newDir);
         if (newDir.equals(new Point(0, -1))) {
             if (!(man.getSmallSizeY() == -1 && (map[newX][newY][0] instanceof Indestruible || map[newX][newY][1] instanceof Indestruible)) && man.getSmallSizeX() == 0) {
                 needRe = true;

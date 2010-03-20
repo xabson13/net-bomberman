@@ -9,12 +9,15 @@ public class Flama extends Cosa {
     int imageLen = 4;
     Timer timer;
     int picType;
-    Bomberman bomberman;
+    Actualizable interfaz;
+    Cosa[][][] map;
 
-    public Flama(Point point, int picType, Bomberman bomberman) {
+    public Flama(Point point, int picType, Cosa[][][] map, Actualizable interfaz) {
         super(point, "./pic/flames.gif", 0, picType * 32, 32, 32);
         this.picType = picType;
-        this.bomberman = bomberman;
+        this.interfaz = interfaz;
+        this.map = map;
+        
         timer = new Timer();
         timer.schedule(new LoadSteps(), 0, 100);
     }
@@ -26,16 +29,17 @@ public class Flama extends Cosa {
     class LoadSteps extends TimerTask {
 
         int picNo = 0;
-
+        Point p = getPoint();
         public void run() {
             picNo++;
             if (picNo == imageLen) {
                 timer.cancel();
-                bomberman.removeObject(getPoint(), 1);
+                map[(int) p.getX()][(int) p.getY()][1] = null;
+                interfaz.refresh();
                 return;
             }
             image = orgImage.getSubimage(0 + picNo * 32, picType * 32, 32, 32);
-            bomberman.repaint();
+            interfaz.refresh();
         }
     }
 }
