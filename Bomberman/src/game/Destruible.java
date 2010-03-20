@@ -8,17 +8,13 @@ public class Destruible extends Indestruible {
     int picSwitch = 0;
     int imageLen = 8;
     Timer timer;
-    Bomberman bomberman;
     Cosa[][][] map;
-
-    public Destruible(Point point) {
-        super(point, "./pic/tile_stage1.bmp", 0, 32, 32, 32);
-    }
+    private Actualizable interfaz;
     
-    public Destruible(Point point, Bomberman bomberman) {
+    public Destruible(Point point, Cosa[][][] map, Actualizable interfaz) {
         super(point, "./pic/tile_stage1.bmp", 0, 32, 32, 32);
-        this.bomberman = bomberman;
-        map = bomberman.map;
+        this.interfaz = interfaz;
+        this.map = map;
 
     }
 
@@ -38,11 +34,11 @@ public class Destruible extends Indestruible {
             if (picNo == imageLen) {
                 timer.cancel();
                 map[(int) p.getX()][(int) p.getY()][1] = null;
-                bomberman.repaint();
+                interfaz.refresh();
                 return;
             }
             image = orgImage.getSubimage(0 + picNo * 32, 32, 32, 32);
-            bomberman.repaint();
+            interfaz.refresh();
         }
     }
 }

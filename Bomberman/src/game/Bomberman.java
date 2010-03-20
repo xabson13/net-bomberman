@@ -3,8 +3,6 @@ package game;
 import game.server.ComObject;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import java.io.*;
 import java.util.*;
@@ -116,9 +114,6 @@ public class Bomberman extends Entorno implements Actualizable{
         map = new Cosa[width][height][5];
 
         try {
-            /*InputStream fstream = this.getClass().getResourceAsStream("./map/1-1.map");
-            DataInputStream in = new DataInputStream(fstream);
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));*/
             String strLine;
             int line = 0;
             int player = 0;
@@ -132,18 +127,17 @@ public class Bomberman extends Entorno implements Actualizable{
                     }
                     if (strLine.charAt(i) >= 'a' && strLine.charAt(i) <= 'z') {
                         player++;
-                        players[player-1] = new Jugador(new Point(i, line), player, this);
+                        players[player-1] = new Jugador(new Point(i, line), player, strLine.charAt(i), map, this);
                         players[player-1].setId(strLine.charAt(i));
                         map[i][line][4] = players[player-1];
                     } else if (strLine.charAt(i) == 'O') {
                         map[i][line][0] = new Obstaculo(new Point(i, line));
                     } else if (strLine.charAt(i) == 'F') {
-                        map[i][line][1] = new Destruible(new Point(i, line), this);
+                        map[i][line][1] = new Destruible(new Point(i, line), map, this);
                     }
                 }
             }
-            //in.close();
-        } catch (Exception e) { //Catch exception if any
+        } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
         }
 
@@ -159,11 +153,11 @@ public class Bomberman extends Entorno implements Actualizable{
     }
 
     public void ponerBomba(char movId){
-            getPlayerById(movId).ponerBomba(map);
+            getPlayerById(movId).ponerBomba();
     }
 
     public void move(Point newDir, Jugador j) {
-        j.move(newDir, map);
+        j.move(newDir);
         j.switchPic();
         repaint();
     }
@@ -183,6 +177,11 @@ public class Bomberman extends Entorno implements Actualizable{
             conexion.enviarPeticion(cobj);
         }
 
+    }
+
+    public void eliminarJugador(char id){
+        Jugador j = getPlayerById(id);
+        j.eliminate();
     }
 
     public void mover(int kcode, char movId) {
@@ -210,6 +209,9 @@ public class Bomberman extends Entorno implements Actualizable{
 
     public void refresh() {
         repaint();
+    }
+
+    public void notificar(Object[] params) {
     }
 
     class LoadSteps extends TimerTask {

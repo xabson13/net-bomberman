@@ -10,50 +10,48 @@ public class Jugador extends Indestruible implements Movible{
     Timer timer;
     private char id;
     private Actualizable interfaz;
-
-    public Jugador(Point point, int playerNo, char id) {
-        super(point, "./pic/bomberman" + playerNo + ".gif", 0, 192, 32, 64);
-        this.id = id;
-    }
+    private Cosa[][][] map;
     
-    public Jugador(Point point, int playerNo, Actualizable interfaz) {
+    public Jugador(Point point, int playerNo, char id, Cosa[][][] map, Actualizable interfaz) {
         super(point, "./pic/bomberman" + playerNo + ".gif", 0, 192, 32, 64);
         this.interfaz = interfaz;
+        this.map = map;
+        this.id = id;
     }
 
-    public boolean checkMove(Point newDir, Cosa[][][] mapa) {
+    public boolean checkMove(Point newDir) {
         boolean permitido = false;
         int newX = (int) (getPoint().getX() + newDir.getX()), newY = (int) (getPoint().getY() + newDir.getY());
         startMove(newDir);
         if (newDir.equals(new Point(0, -1))) {
             if (!(getSmallSizeY() == -1 &&
-                    (mapa[newX][newY][0] instanceof Indestruible ||
-                     mapa[newX][newY][1] instanceof Indestruible ||
-                     mapa[newX][newY][4] instanceof Indestruible)) &&
+                    (map[newX][newY][0] instanceof Indestruible ||
+                     map[newX][newY][1] instanceof Indestruible ||
+                     map[newX][newY][4] instanceof Indestruible)) &&
                     getSmallSizeX() == 0) {
                 permitido = true;
             }
         } else if (newDir.equals(new Point(0, 1))) {
             if (!(getSmallSizeY() == 1 &&
-                    (mapa[newX][newY][0] instanceof Indestruible ||
-                     mapa[newX][newY][4] instanceof Indestruible ||
-                     mapa[newX][newY][1] instanceof Indestruible)) &&
+                    (map[newX][newY][0] instanceof Indestruible ||
+                     map[newX][newY][4] instanceof Indestruible ||
+                     map[newX][newY][1] instanceof Indestruible)) &&
                      getSmallSizeX() == 0) {
                 permitido = true;
             }
         } else if (newDir.equals(new Point(-1, 0))) {
             if (!(getSmallSizeX() == -1 &&
-                    (mapa[newX][newY][0] instanceof Indestruible ||
-                     mapa[newX][newY][4] instanceof Indestruible ||
-                     mapa[newX][newY][1] instanceof Indestruible)) &&
+                    (map[newX][newY][0] instanceof Indestruible ||
+                     map[newX][newY][4] instanceof Indestruible ||
+                     map[newX][newY][1] instanceof Indestruible)) &&
                      getSmallSizeY() == 0) {
                 permitido = true;
             }
         } else if (newDir.equals(new Point(1, 0))) {
             if (!(getSmallSizeX() == 1 &&
-                    (mapa[newX][newY][0] instanceof Indestruible ||
-                     mapa[newX][newY][4] instanceof Indestruible ||
-                     mapa[newX][newY][1] instanceof Indestruible)) &&
+                    (map[newX][newY][0] instanceof Indestruible ||
+                     map[newX][newY][4] instanceof Indestruible ||
+                     map[newX][newY][1] instanceof Indestruible)) &&
                      getSmallSizeY() == 0) {
                 permitido = true;
             }
@@ -94,8 +92,8 @@ public class Jugador extends Indestruible implements Movible{
         return false;
     }
 
-    public void move(Point newDir, Cosa[][][] map){
-        if (checkMove(newDir, map)) {
+    public void move(Point newDir){
+        if (checkMove(newDir)) {
             if (startMove(newDir)) {
                 map[(int) getPoint().getX()][(int) getPoint().getY()][4] = null;
                 Point temp = new Point(newDir.x + getPoint().x, newDir.y + getPoint().y);
@@ -105,7 +103,7 @@ public class Jugador extends Indestruible implements Movible{
         }
     }
 
-    public void ponerBomba(Cosa[][][] map){
+    public void ponerBomba(){
         if (map[(int) getPoint().getX()][(int) getPoint().getY()][1] == null) {
             map[(int) getPoint().getX()][(int) getPoint().getY()][1] = new Bomba(new Point(getPoint()), 3, map, interfaz);
         }
@@ -114,7 +112,12 @@ public class Jugador extends Indestruible implements Movible{
     @Override
     public boolean explode() {
         image = orgImage.getSubimage(96, 192, 32, 64);
+        interfaz.notificar(new Object[]{1, id}); // Notify death
         return true;
+    }
+
+    public void eliminate(){
+        map[(int) getPoint().getX()][(int) getPoint().getY()][4] = null;
     }
 
     public char getId() {

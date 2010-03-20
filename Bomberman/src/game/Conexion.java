@@ -8,9 +8,7 @@ import game.server.ComObject;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.StringTokenizer;
 import java.util.Vector;
-import javax.swing.JOptionPane;
 
 /**
  *
@@ -39,15 +37,12 @@ public class Conexion extends Thread {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        System.out.println("start(0)");
     }
 
     @Override
     public void run() {
-        System.out.println("start()");
         try {
             bomberman.pedirUsuario();
-            System.out.println("start(2)");
             while (true) {
                 ComObject cobj = (ComObject) entrada.readObject();
                 if (cobj != null) {
@@ -133,6 +128,15 @@ public class Conexion extends Thread {
             case 305: // broadcast bomba
                 movId = (Character) cobj.getObjects().get(1);
                 bomberman.ponerBomba(movId);
+                break;
+            case 306: // broadcast death
+                movId = (Character) cobj.getObjects().get(0);
+                if(movId == id){
+                    cerrarConexion();
+                    System.exit(0);
+                }else{
+                    bomberman.eliminarJugador(movId);
+                }
                 break;
         }
     }

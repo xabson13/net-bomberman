@@ -12,8 +12,8 @@ import java.awt.Point;
  * @author Sergio
  */
 public interface Movible {
-    boolean checkMove(Point newDir, Cosa[][][] mapa);
+    boolean checkMove(Point newDir);
     boolean startMove(Point pt);
-    void move(Point newDir, Cosa[][][] map);
+    void move(Point newDir);
     void finishMove(Point pt);
 }

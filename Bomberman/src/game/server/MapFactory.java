@@ -4,6 +4,7 @@
  */
 package game.server;
 
+import game.Actualizable;
 import game.Cosa;
 import game.Destruible;
 import game.Fondo;
@@ -29,9 +30,11 @@ public class MapFactory {
     private final static int MAPHEIGHT = 11;
     private Cosa map[][][];
     private String mapa[];
+    private Actualizable updatable;
 
-    public MapFactory() {
+    public MapFactory(Actualizable updatable) {
         mapa = new String[MAPHEIGHT];
+        this.updatable = updatable;
     }
 
     public boolean checkMove(Point newDir, Jugador man) {
@@ -59,7 +62,7 @@ public class MapFactory {
         return needRe;
     }
 
-        public void generate(List<Conexion> threadPlayers) {
+    public void generar(List<Conexion> threadPlayers) {
         map = new Cosa[MAPWIDTH][MAPHEIGHT][5];
         try {
             InputStream fstream = this.getClass().getResourceAsStream("../map/1-1.map");
@@ -79,13 +82,13 @@ public class MapFactory {
                     }
                     if (strLine.charAt(i) >= 'a' && strLine.charAt(i) <= 'z') {
                         player++;
-                        Jugador man = new Jugador(new Point(i, line), player, strLine.charAt(i));
+                        Jugador man = new Jugador(new Point(i, line), player, strLine.charAt(i), map, updatable);
                         map[i][line][4] = man;
-                        threadPlayers.get(player-1).setJugador(man);
+                        threadPlayers.get(player - 1).setJugador(man);
                     } else if (strLine.charAt(i) == 'O') {
                         map[i][line][0] = new Obstaculo(new Point(i, line));
                     } else if (strLine.charAt(i) == 'F') {
-                        map[i][line][1] = new Destruible(new Point(i, line));
+                        map[i][line][1] = new Destruible(new Point(i, line), map, updatable);
                     }
                 }
                 line++;
@@ -97,7 +100,11 @@ public class MapFactory {
         }
     }
 
-    public String[] getMapa() {
+    public String[] getMapaAsArray() {
         return mapa;
+    }
+
+    public Cosa[][][] getMapa() {
+        return map;
     }
 }

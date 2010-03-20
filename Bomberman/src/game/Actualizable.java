@@ -11,4 +11,5 @@ package game;
  */
 public interface Actualizable {
     abstract void refresh();
+    abstract void notificar(Object[] params);
 }

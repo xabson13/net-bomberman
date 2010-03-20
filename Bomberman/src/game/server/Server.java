@@ -4,8 +4,10 @@ package game.server;
  *
  * @author Sergio
  */
+import game.Actualizable;
 import game.Jugador;
 import java.awt.Point;
+import java.awt.event.KeyEvent;
 import java.net.*;
 import java.io.*;
 import java.util.*;
@@ -53,12 +55,21 @@ public class Server {
         Vector<String> users = new Vector<String>();
 
         for (Conexion con : clientes) {
-            if( con.getNombre() != null )
+            if (con.getNombre() != null) {
                 if (!con.getNombre().equals(c.getNombre())) {
                     users.add(con.getNombre());
                 }
+            }
         }
         return users;
+    }
+
+    private Conexion getConexionById(Character id){
+        for( Conexion c : clientes ){
+            if( c.player.getId() == id )
+                return c;
+        }
+        return null;
     }
 
     private boolean isAllReady() {
@@ -75,7 +86,7 @@ public class Server {
         server.iniciar();
     }
 
-    class Conexion extends Thread {
+    class Conexion extends Thread implements Actualizable{
 
         private Socket socket;
         private ObjectOutputStream salida;
@@ -90,7 +101,7 @@ public class Server {
             this.socket = socket;
             this.ready = false;
             this.connected = false;
-            mf = new MapFactory();
+            mf = new MapFactory(this);
         }
 
         @Override
@@ -119,6 +130,16 @@ public class Server {
             }
         }
 
+        public void cerrarConexion() {
+            try {
+                entrada.close();
+                salida.close();
+                socket.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         private void enviarRespuesta(ComObject cobj) {
             try {
                 salida.writeObject(cobj);
@@ -143,7 +164,7 @@ public class Server {
                     move(cobj.getObjects());
                     break;
                 case 104: // bomba
-                    bomba(cobj.getObjects());
+                    ponerBomba(cobj.getObjects());
                     break;
             }
         }
@@ -182,10 +203,10 @@ public class Server {
                 return;
             }
             if (isAllReady()) {
-                mf.generate(clientes);
-                for( Conexion c : clientes ){
+                mf.generar(clientes);
+                for (Conexion c : clientes) {
                     ComObject cobj = new ComObject(303); // broascast mapa
-                    cobj.addObject(mf.getMapa());
+                    cobj.addObject(mf.getMapaAsArray());
                     cobj.addObject(c.player.getId());
                     c.enviarRespuesta(cobj);
                 }
@@ -197,30 +218,58 @@ public class Server {
 
         private void move(Vector data) {
             Integer kcode = (Integer) data.get(0);
-            if(started && connected){
-                ComObject cobj = new ComObject(304); // broadcast move
-                cobj.addObject(kcode);
-                cobj.addObject(player.getId());
-                broadcastRespuesta(cobj);
+            if (started && connected) {
+                broadcastMove(kcode);
+
+                Point movept = new Point(0, 0);
+                switch (kcode) {
+                    case KeyEvent.VK_UP:
+                        movept = new Point(0, -1);
+                        break;
+                    case KeyEvent.VK_DOWN:
+                        movept = new Point(0, 1);
+                        break;
+                    case KeyEvent.VK_LEFT:
+                        movept = new Point(-1, 0);
+                        break;
+                    case KeyEvent.VK_RIGHT:
+                        movept = new Point(1, 0);
+                        break;
+                }
+                (new LoadSteps(movept, player)).run();
             }
         }
 
-        private void bomba(Vector data) {
+        private void broadcastMove(int kcode) {
+            ComObject cobj = new ComObject(304); // broadcast move
+            cobj.addObject(kcode);
+            cobj.addObject(player.getId());
+            System.out.println("pid+" + player.getId());
+            broadcastRespuesta(cobj);
+        }
+
+        private void ponerBomba(Vector data) {
             Integer kcode = (Integer) data.get(0);
-            if(started && connected){
-                ComObject cobj = new ComObject(305); // broadcast bomba
-                cobj.addObject(kcode);
-                cobj.addObject(player.getId());
-                broadcastRespuesta(cobj);
+            if (started && connected) {
+                broadcastBomba(kcode);
+                player.ponerBomba();
             }
+        }
+
+        private void broadcastBomba(int kcode) {
+            ComObject cobj = new ComObject(305); // broadcast bomba
+            cobj.addObject(kcode);
+            cobj.addObject(player.getId());
+            broadcastRespuesta(cobj);
         }
 
         private boolean existeUsuario(String name) {
             for (Conexion c : clientes) {
-                if( c.getNombre() != null )
+                if (c.getNombre() != null) {
                     if (c.getNombre().equalsIgnoreCase(name) && this != c) {
                         return true;
                     }
+                }
             }
             return false;
         }
@@ -231,6 +280,37 @@ public class Server {
 
         public void setJugador(Jugador player) {
             this.player = player;
+        }
+
+        public void refresh() {
+        }
+
+        public void notificar(Object[] params) {
+            Integer code = (Integer) params[0];
+            Character id = (Character) params[1];
+
+            if( code == 1 ){
+                Conexion c = getConexionById(id);
+                ComObject cobj = new ComObject(306); // broadcast death
+                cobj.addObject(id);
+                broadcastRespuesta(cobj);
+                c.cerrarConexion();
+            }
+        }
+    }
+
+    class LoadSteps extends TimerTask {
+
+        Point pt = new Point(0, 0);
+        Jugador j = null;
+
+        public LoadSteps(Point pt, Jugador j) {
+            this.j = j;
+            this.pt = pt;
+        }
+
+        public void run() {
+            j.move(pt);
         }
     }
 }
