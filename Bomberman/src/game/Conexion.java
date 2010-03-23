@@ -133,7 +133,7 @@ public class Conexion extends Thread {
                 movId = (Character) cobj.getObjects().get(0);
                 if(movId == id){
                     cerrarConexion();
-                    System.exit(0);
+                    bomberman.setEnabled(false);
                 }else{
                     bomberman.eliminarJugador(movId);
                 }
