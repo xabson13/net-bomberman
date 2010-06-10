@@ -27,7 +27,7 @@ public class Server {
         clientes = new ArrayList<Conexion>();
     }
 
-    private void iniciar() {
+    public void iniciar() {
         try {
             System.out.println("INFO: Iniciando Servidor ");
             ServerSocket socketServer = new ServerSocket(PORT);
