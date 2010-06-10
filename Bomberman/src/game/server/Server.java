@@ -18,7 +18,7 @@ import java.util.*;
  */
 public class Server {
 
-    public static final int PORT = 8012;
+    public static final int PORT = 8011;
     private List<Conexion> clientes;
     private boolean started;
 
@@ -59,6 +59,17 @@ public class Server {
                 if (!con.getNombre().equals(c.getNombre())) {
                     users.add(con.getNombre());
                 }
+            }
+        }
+        return users;
+    }
+
+    private Vector<String> getStatus() {
+        Vector<String> users = new Vector<String>();
+
+        for (Conexion con : clientes) {
+            if (con.getNombre() != null) {
+                users.add(con.getNombre() + ";" + con.ready + ";" );
             }
         }
         return users;
@@ -132,6 +143,7 @@ public class Server {
 
         public void cerrarConexion() {
             try {
+                clientes.remove(this);
                 entrada.close();
                 salida.close();
                 socket.close();
@@ -142,6 +154,7 @@ public class Server {
 
         private void enviarRespuesta(ComObject cobj) {
             try {
+                System.out.println("Response code: " + cobj.getCode());
                 salida.writeObject(cobj);
                 salida.flush();
             } catch (Exception err) {
@@ -170,9 +183,11 @@ public class Server {
         }
 
         private void connect(String user) {
+            if( getUsuarios(this).size() < 2 )
+                started = false;
             nombre = user;
             ComObject cobj;
-            if (!existeUsuario(nombre)) {
+            if (!existeUsuario(nombre) && !started) {
                 cobj = new ComObject(201); // connected
                 cobj.addObject(getUsuarios(this));
                 enviarRespuesta(cobj);
@@ -180,8 +195,13 @@ public class Server {
                 cobj.setTag(nombre);
                 broadcastRespuesta(cobj);
                 connected = true;
-            } else {
+            } else if(existeUsuario(nombre)){
                 cobj = new ComObject(402); // user exist
+                enviarRespuesta(cobj);
+                nombre = null;
+                clientes.remove(this);
+            }else{
+                cobj = new ComObject(-10); // juego empezado
                 enviarRespuesta(cobj);
                 nombre = null;
                 clientes.remove(this);
@@ -192,6 +212,10 @@ public class Server {
             if (connected) {
                 ready = true;
                 enviarRespuesta(new ComObject(200)); // ok
+                ComObject cobj;
+                cobj = new ComObject(307); // status && ids
+                cobj.addObject(getStatus());
+                broadcastRespuesta(cobj);
             } else {
                 enviarRespuesta(new ComObject(403)); // not connected
             }
@@ -294,7 +318,7 @@ public class Server {
                 ComObject cobj = new ComObject(306); // broadcast death
                 cobj.addObject(id);
                 broadcastRespuesta(cobj);
-                c.cerrarConexion();
+                //c.cerrarConexion();
             }
         }
     }

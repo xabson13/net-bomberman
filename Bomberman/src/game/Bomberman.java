@@ -3,8 +3,8 @@ package game;
 import game.server.ComObject;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import javax.swing.JOptionPane;
-import java.io.*;
 import java.util.*;
 
 public class Bomberman extends Entorno implements Actualizable{
@@ -16,7 +16,6 @@ public class Bomberman extends Entorno implements Actualizable{
 
     public Bomberman() {
         super();
-        conexion = new Conexion(this);
     }
 
     public static void main(String[] args) {
@@ -24,25 +23,48 @@ public class Bomberman extends Entorno implements Actualizable{
     }
 
     public void actionPerformed(ActionEvent actionEvent) {
-        if (actionEvent.getActionCommand().equals("About")) {
-            JOptionPane.showMessageDialog(null, "CSC3100: Software Engineering\nProject: Bomberman\n(c) Wong Man Tik");
+        String c = actionEvent.getActionCommand();
+
+        if (c.equals("Conectar")){
+            try {
+                conexion = new Conexion(this, field_host.getText(), Integer.parseInt(field_port.getText()));
+                conectar.setEnabled(false);
+                desconectar.setEnabled(true);
+                field_host.setEnabled(false);
+                field_port.setEnabled(false);
+                status.setText("Estado: Conectado, validando...");
+                off = false;
+                conexion.start();
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Error de conexion, el servidor no se encuentra disponible.");
+            } catch (Exception ex) {
+
+            }
         }
-        if (actionEvent.getActionCommand().equals("Reset Game")) {
-            conexion.setListo();
+
+        if (c.equals("Desconectar")){
+            try {
+                conexion.cerrarConexion();
+                conectar.setEnabled(true);
+                desconectar.setEnabled(false);
+                field_host.setEnabled(true);
+                field_port.setEnabled(true);
+                status.setText("Estado: Desconectado");
+                empezar.setEnabled(false);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "No se puede terminar la conexion.");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error: " + ex);
+            }
         }
-        if (actionEvent.getActionCommand().equals("Quit Game")) {
+        if (c.equals("Empezar")){
+            conexion.empezarJuego();
+            empezar.setEnabled(false);
+        }
+        if (c.equals("Quit Game")) {
             System.exit(1);
         }
-        if (actionEvent.getActionCommand().equals("Save Moves")) {
-            conexion.empezarJuego();
-        }
-        if (actionEvent.getActionCommand().equals("Load  Moves")) {
-        }
-        if (actionEvent.getActionCommand().equals("New Game")) {
-            //newGame();
 
-            conexion.start();
-        }
     }
 
     public void pedirUsuario() {
@@ -52,67 +74,18 @@ public class Bomberman extends Entorno implements Actualizable{
         conexion.enviarPeticion(cobj);
     }
 
-    public String getLoadFilePath() {
-        FileDialog fd = new FileDialog(new Frame(), "File Select");
-        fd.show();
-        String name = fd.getFile();
-        if (name == null) {
-            return null;
-        }
-        fd.dispose();
-        return fd.getDirectory() + name;
-    }
-
-    public String getSaveFilePath() {
-        FileDialog fd = new FileDialog(new Frame(), "File Save", FileDialog.SAVE);
-        fd.show();
-        String name = fd.getFile();
-        if (name == null) {
-            return null;
-        }
-        fd.dispose();
-        return fd.getDirectory() + name;
-    }
-
-    public void saveMove() {
-        try {
-            FileWriter fstream = new FileWriter(getSaveFilePath());
-            BufferedWriter out = new BufferedWriter(fstream);
-            out.write("\n");
-
-            out.close();
-        } catch (IOException e) {//Catch exception if any
-            JOptionPane.showMessageDialog(null, "Cannot write to the specific file.");
-        } catch (NullPointerException e) {
-        }
-
-    }
-
-    public void loadMove() {
-        try {
-            FileInputStream fstream = new FileInputStream(getLoadFilePath());
-            DataInputStream in = new DataInputStream(fstream);
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            String strLine;
-            while ((strLine = br.readLine()) != null) {
-            }
-            in.close();
-        } catch (FileNotFoundException e) {
-            JOptionPane.showMessageDialog(null, "File not found.");
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "File not found.");
-        } catch (InputMismatchException e) {
-            JOptionPane.showMessageDialog(null, "File format mismatch!");
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(null, "File format mismatch!");
-        } catch (NullPointerException e) {
-        }
+    public void existeUsuario() {
+        JOptionPane.showMessageDialog(this, "El usuario ya existe, escoje otro nombre");
+        ComObject cobj = new ComObject(100);
+        String name = JOptionPane.showInputDialog("Nombre: ");
+        cobj.setTag(name);
+        conexion.enviarPeticion(cobj);
     }
 
     protected void newGame(String mapa[]) {
 
         map = new Cosa[width][height][5];
-
+        java.util.List<Jugador> lplayer = new ArrayList<Jugador>();
         try {
             String strLine;
             int line = 0;
@@ -127,9 +100,12 @@ public class Bomberman extends Entorno implements Actualizable{
                     }
                     if (strLine.charAt(i) >= 'a' && strLine.charAt(i) <= 'z') {
                         player++;
-                        players[player-1] = new Jugador(new Point(i, line), player, strLine.charAt(i), map, this);
-                        players[player-1].setId(strLine.charAt(i));
-                        map[i][line][4] = players[player-1];
+                        Jugador nj = new Jugador(new Point(i, line), player, strLine.charAt(i), map, this);
+                        nj.setId(strLine.charAt(i));
+                        lplayer.add(nj);
+                        //players[player-1] = new Jugador(new Point(i, line), player, strLine.charAt(i), map, this);
+                        //players[player-1].setId(strLine.charAt(i));
+                        map[i][line][4] = nj;
                     } else if (strLine.charAt(i) == 'O') {
                         map[i][line][0] = new Obstaculo(new Point(i, line));
                     } else if (strLine.charAt(i) == 'F') {
@@ -137,7 +113,9 @@ public class Bomberman extends Entorno implements Actualizable{
                     }
                 }
             }
+            players = lplayer.toArray(new Jugador[0]);
         } catch (Exception e) {
+            e.printStackTrace();
             System.err.println("Error: " + e.getMessage());
         }
 
