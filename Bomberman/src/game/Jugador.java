@@ -13,7 +13,7 @@ public class Jugador extends Indestruible implements Movible{
     private Cosa[][][] map;
     
     public Jugador(Point point, int playerNo, char id, Cosa[][][] map, Actualizable interfaz) {
-        super(point, "./pic/bomberman" + playerNo + ".gif", 0, 192, 32, 64);
+        super(point, "/game/pic/bomberman" + playerNo + ".gif", 0, 192, 32, 64);
         this.interfaz = interfaz;
         this.map = map;
         this.id = id;

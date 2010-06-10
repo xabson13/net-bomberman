@@ -12,7 +12,7 @@ public class Destruible extends Indestruible {
     private Actualizable interfaz;
     
     public Destruible(Point point, Cosa[][][] map, Actualizable interfaz) {
-        super(point, "./pic/tile_stage1.bmp", 0, 32, 32, 32);
+        super(point, "/game/pic/tile_stage1.bmp", 0, 32, 32, 32);
         this.interfaz = interfaz;
         this.map = map;
 

@@ -13,7 +13,7 @@ public class Bomba extends Indestruible {
     Cosa[][][] map;
 
     public Bomba(Point point, int flameLen, Cosa[][][] map, Actualizable interfaz) {
-        super(point, "./pic/bombs.gif", 0, 0, 32, 32);
+        super(point, "/game/pic/bombs.gif", 0, 0, 32, 32);
         this.flameLen = flameLen;
         this.interfaz = interfaz;
         this.map = map;

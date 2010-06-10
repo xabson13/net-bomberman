@@ -13,7 +13,7 @@ public class Flama extends Cosa {
     Cosa[][][] map;
 
     public Flama(Point point, int picType, Cosa[][][] map, Actualizable interfaz) {
-        super(point, "./pic/flames.gif", 0, picType * 32, 32, 32);
+        super(point, "/game/pic/flames.gif", 0, picType * 32, 32, 32);
         this.picType = picType;
         this.interfaz = interfaz;
         this.map = map;

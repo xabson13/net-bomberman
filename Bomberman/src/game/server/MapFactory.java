@@ -65,7 +65,7 @@ public class MapFactory {
     public void generar(List<Conexion> threadPlayers) {
         map = new Cosa[MAPWIDTH][MAPHEIGHT][5];
         try {
-            InputStream fstream = this.getClass().getResourceAsStream("../map/"+threadPlayers.size()+".map");
+            InputStream fstream = this.getClass().getResourceAsStream("/game/map/"+threadPlayers.size()+".map");
             DataInputStream in = new DataInputStream(fstream);
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
             String strLine;
